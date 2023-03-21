@@ -80,6 +80,9 @@ public class Swerve {
             m_backLeft,
             m_backRight
     };
+    private double pitch = getPitch().getDegrees();
+    private double roll = getRoll().getDegrees();
+    private double yaw = getYaw().getDegrees();
 
 
     public Swerve() {
@@ -160,10 +163,10 @@ public class Swerve {
     public void setWheelsUp() {
         // TODO: get Yaw from gyro method and move to new class
         setModuleStates(new SwerveModuleState[]{
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw()))
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation()))
         });
     }
 
@@ -176,7 +179,7 @@ public class Swerve {
     public void resetOdometry(Pose2d pose) {
         // TODO: get Yaw from gyro method and move to new class
         poseEstimator.resetPosition(
-                getYaw(),
+                getPose().getRotation(),
                 getModulePositions(),
                 pose);
     }
@@ -206,6 +209,30 @@ public class Swerve {
         return positions;
     }
 
-    public void getYaw() {
+    public Rotation2d getYaw() {
+        Rotation2d yawRotation2d = Rotation2d.fromDegrees(gyro.getAngle() - ((gyro.getAngle() > 0) ? 180 : -180));
+
+        this.yaw = yawRotation2d.unaryMinus().getDegrees();
+
+        return yawRotation2d;
+    }
+    public Rotation2d getPitch() {
+
+        Rotation2d pitchRotation2d = Rotation2d.fromDegrees(gyro.getXComplementaryAngle() - ((gyro.getXComplementaryAngle() > 0) ? 180 : -180));
+
+        this.pitch = pitchRotation2d.unaryMinus().getDegrees();
+
+        return pitchRotation2d;
+
+    }
+
+    public Rotation2d getRoll() {
+
+        Rotation2d rollRotation2d = Rotation2d.fromDegrees(gyro.getYComplementaryAngle() - ((gyro.getYComplementaryAngle() > 0) ? 180 : -180));
+
+        this.roll = rollRotation2d.unaryMinus().getDegrees();
+
+        return rollRotation2d;
+
     }
 }
