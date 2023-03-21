@@ -49,7 +49,7 @@ public class Constants {
         public static final double FRONT_LEFT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(180+90);
         public static final double FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(-90+90);
         public static final double BACK_LEFT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(90+90);
-        public static final double BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(0+90);
+        public static final double BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(90);
 
         // Driving motors CAN IDs (EVEN)
         public static final int FRONT_LEFT_DRIVING_CAN_ID = 3;

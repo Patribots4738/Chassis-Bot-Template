@@ -15,14 +15,10 @@ public class Robot extends TimedRobot {
     private final Swerve swerve = new Swerve();
 
     @Override
-    public void robotInit() {
-
-    }
+    public void robotInit() {}
 
     @Override
-    public void robotPeriodic() {
-
-    }
+    public void robotPeriodic() {}
 
     @Override
     public void autonomousInit() {}
@@ -30,12 +26,11 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {}
 
     @Override
-    public void teleopInit() {
-
-    }
+    public void teleopInit() {}
 
     @Override
     public void teleopPeriodic() {
+        // swap the left Y and left X values because the field is rotated 90 degrees to the driver station (this may change depending on where the drive is.)
         swerve.drive(driver.getLeftY(), driver.getLeftX(), driver.getRightX(), true, driver.getAButton());
     }
 
