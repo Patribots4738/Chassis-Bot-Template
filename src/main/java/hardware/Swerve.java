@@ -65,7 +65,7 @@ public class Swerve {
     private final SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(
                     DriveConstants.DRIVE_KINEMATICS,
-                    getGyroAngle(),
+                    getYaw(),
                     getModulePositions(),
                     new Pose2d(),
                     // These standard deviations are the default values, (the higher these values are, the less you trust the measurements)
@@ -124,7 +124,7 @@ public class Swerve {
                             xSpeedLimiter.calculate(xSpeed),
                             ySpeedLimiter.calculate(ySpeed),
                             rotationLimiter.calculate(rotation),
-                            getPose().getRotation())
+                            getPoseRotation())
                             : new ChassisSpeeds(
                             xSpeedLimiter.calculate(xSpeed) * DriveConstants.MAX_SPEED_METERS_PER_SECOND,
                             ySpeedLimiter.calculate(ySpeed) * DriveConstants.MAX_SPEED_METERS_PER_SECOND,
@@ -137,7 +137,7 @@ public class Swerve {
                             xSpeed,
                             ySpeed,
                             rotation,
-                            getPose().getRotation())
+                            getPoseRotation())
                             : new ChassisSpeeds(
                             xSpeed,
                             ySpeed,
@@ -147,7 +147,7 @@ public class Swerve {
     }
 
     public void updateOdometry() {
-        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getGyroAngle(), getModulePositions());
+        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         this.field.setRobotPose(getPose());
     }
 
@@ -163,10 +163,10 @@ public class Swerve {
     public void setWheelsUp() {
         // TODO: get Yaw from gyro method and move to new class
         setModuleStates(new SwerveModuleState[]{
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation())),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation())),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation())),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPose().getRotation()))
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPoseRotation())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPoseRotation())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPoseRotation())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getPoseRotation()))
         });
     }
 
@@ -179,7 +179,7 @@ public class Swerve {
     public void resetOdometry(Pose2d pose) {
         // TODO: get Yaw from gyro method and move to new class
         poseEstimator.resetPosition(
-                getPose().getRotation(),
+                getPoseRotation(),
                 getModulePositions(),
                 pose);
     }
@@ -209,10 +209,20 @@ public class Swerve {
         return positions;
     }
 
+    public void zeroHeading() {
+        gyro.reset();
+    }
+    public Rotation2d getPoseRotation() {
+        return getPose().getRotation();
+    }
     public Rotation2d getYaw() {
-        Rotation2d yawRotation2d = Rotation2d.fromDegrees(gyro.getAngle() - ((gyro.getAngle() > 0) ? 180 : -180));
+        Rotation2d yawRotation2d = Rotation2d.fromDegrees(gyro.getAngle());
 
-        this.yaw = yawRotation2d.unaryMinus().getDegrees();
+        if (DriveConstants.GYRO_REVERSED) {
+            yawRotation2d = yawRotation2d.unaryMinus();
+        }
+
+        this.yaw = yawRotation2d.getDegrees();
 
         return yawRotation2d;
     }
@@ -225,7 +235,6 @@ public class Swerve {
         return pitchRotation2d;
 
     }
-
     public Rotation2d getRoll() {
 
         Rotation2d rollRotation2d = Rotation2d.fromDegrees(gyro.getYComplementaryAngle() - ((gyro.getYComplementaryAngle() > 0) ? 180 : -180));
