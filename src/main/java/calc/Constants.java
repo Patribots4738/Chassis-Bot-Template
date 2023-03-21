@@ -5,9 +5,38 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public class Constants {
+
+    public static final class AutoConstants {
+
+        public static final double MAX_SPEED_METERS_PER_SECOND = 4; // previously 1.75
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1.5; // 2.5; (2.5vel and 2.5accel output 3s runtime on _1_A)
+        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 4 * Math.PI;
+        public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND_SQUARED = Math.PI;
+
+        public static final double PX_CONTROLLER = 1;
+        public static final double PY_CONTROLLER = 1;
+        public static final double P_THETA_CONTROLLER = 1;
+
+        public static final double X_CORRECTION_P = 2.5;//7;
+        public static final double X_CORRECTION_I = 0;
+        public static final double X_CORRECTION_D = 0.2;
+
+        public static final double Y_CORRECTION_P = 2.5;//6.03;
+        public static final double Y_CORRECTION_I = 0;
+        public static final double Y_CORRECTION_D = 0.2;
+
+        public static final double ROTATION_CORRECTION_P = .63;
+        public static final double ROTATION_CORRECTION_I = 0;
+        public static final double ROTATION_CORRECTION_D = 0;
+
+        // Constraint for the motion-profiled robot angle controller
+        public static final TrapezoidProfile.Constraints THETA_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_ANGULAR_SPEED_RADIANS_PER_SECOND, MAX_ANGULAR_SPEED_RADIANS_PER_SECOND_SQUARED);
+    }
 
     public static final class VisionConstants {
         public static final String CAMERA_NAME = "photonvision";
