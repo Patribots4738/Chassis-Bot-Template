@@ -20,20 +20,50 @@ public class Constants {
     }
 
     public static final class DriveConstants {
+        // Driving Parameters - Note that these are not the maximum capable speeds of
+        // the robot, rather the allowed maximum speeds
+        public static double MAX_SPEED_METERS_PER_SECOND = AutoConstants.MAX_SPEED_METERS_PER_SECOND;
+        public static double MAX_ANGULAR_SPEED = 5 * Math.PI; // radians per second
+
+        public static final double MAX_TELEOP_SPEED_METERS_PER_SECOND = Units.feetToMeters(13.51);
+
+        public static final double DIRECTION_SLEW_RATE = 6.28; // radians per second
+        public static final double MAGNITUDE_SLEW_RATE = 80.0; // percent per second (1 = 100%)
+        public static final double ROTATIONAL_SLEW_RATE = 80.0; // percent per second (1 = 100%)
+
+        // Chassis configuration
         // Distance between centers of right and left wheels on robot
         public static final double TRACK_WIDTH = Units.inchesToMeters(21.5);
         // Distance between front and back wheels on robot
         public static final double WHEEL_BASE = Units.inchesToMeters(21.5);
 
-        // Kinematics of the robot (these can change if the robot is reconfigured in some way)
         public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(
-//                              Front Positive,     Left Positive
-                new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),  // Front Left
-                new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),  // Front Right
-                new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2),  // Rear Left
+                //                  Front Positive,     Left Positive
+                new Translation2d( WHEEL_BASE / 2,  TRACK_WIDTH / 2),  // Front Left
+                new Translation2d( WHEEL_BASE / 2, -TRACK_WIDTH / 2),  // Front Right
+                new Translation2d(-WHEEL_BASE / 2,  TRACK_WIDTH / 2),  // Rear Left
                 new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2)); // Rear Right
-        public static final double MAX_SPEED = 3.0; // 3 meters per second
-        public static final double MAX_ANGULAR_SPEED = Math.PI; // 1/2 rotation per second
+
+        // Angular offsets of the modules relative to the chassis in radians
+        // add 90 degrees to change the X and Y axis
+        public static final double FRONT_LEFT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(180+90);
+        public static final double FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(-90+90);
+        public static final double BACK_LEFT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(90+90);
+        public static final double BACK_RIGHT_CHASSIS_ANGULAR_OFFSET = Math.toRadians(0+90);
+
+        // Driving motors CAN IDs (EVEN)
+        public static final int FRONT_LEFT_DRIVING_CAN_ID = 3;
+        public static final int BACK_LEFT_DRIVING_CAN_ID = 5;
+        public static final int FRONT_RIGHT_DRIVING_CAN_ID = 1;
+        public static final int BACK_RIGHT_DRIVING_CAN_ID = 7;
+
+        // Turning motors CAN IDs (ODD)
+        public static final int FRONT_LEFT_TURNING_CAN_ID = 4;
+        public static final int BACK_LEFT_TURNING_CAN_ID = 6;
+        public static final int FRONT_RIGHT_TURNING_CAN_ID = 2;
+        public static final int BACK_RIGHT_TURNING_CAN_ID = 8;
+
+        public static final boolean GYRO_REVERSED = true;
     }
 
     public static final class NeoMotorConstants {

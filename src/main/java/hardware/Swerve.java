@@ -36,11 +36,22 @@ public class Swerve {
     private final Translation2d frontRightLocation = new Translation2d(0.381, -0.381);
     private final Translation2d backLeftLocation = new Translation2d(-0.381, 0.381);
     private final Translation2d backRightLocation = new Translation2d(-0.381, -0.381);
-    // TODO: Fix the MAXSwerveModule class instantiation.
-    private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(1, 2, 0, 1, 2, 3);
-    private final MAXSwerveModule m_frontRight = new MAXSwerveModule(3, 4, 4, 5, 6, 7);
-    private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, 8, 9, 10, 11);
-    private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, 12, 13, 14, 15);
+    private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
+            Constants.DriveConstants.FRONT_LEFT_DRIVING_CAN_ID,
+            Constants.DriveConstants.FRONT_LEFT_TURNING_CAN_ID,
+            Constants.DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET);
+    private final MAXSwerveModule m_frontRight = new MAXSwerveModule(
+            Constants.DriveConstants.FRONT_RIGHT_DRIVING_CAN_ID,
+            Constants.DriveConstants.FRONT_RIGHT_TURNING_CAN_ID,
+            Constants.DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET);
+    private final MAXSwerveModule m_backLeft = new MAXSwerveModule(
+            Constants.DriveConstants.BACK_LEFT_DRIVING_CAN_ID,
+            Constants.DriveConstants.BACK_LEFT_TURNING_CAN_ID,
+            Constants.DriveConstants.BACK_LEFT_CHASSIS_ANGULAR_OFFSET);
+    private final MAXSwerveModule m_backRight = new MAXSwerveModule(
+            Constants.DriveConstants.BACK_RIGHT_DRIVING_CAN_ID,
+            Constants.DriveConstants.BACK_RIGHT_TURNING_CAN_ID,
+            Constants.DriveConstants.BACK_RIGHT_CHASSIS_ANGULAR_OFFSET);
     // TODO: edit what gyro we use
     private final AnalogGyro gyro = new AnalogGyro(0);
     private final MAXSwerveModule[] MAXSwerveModules = new MAXSwerveModule[]{
