@@ -5,7 +5,7 @@
 
 package hardware;
 
-import calc.Constants;
+import calc.Constants.*;
 import calc.PhotonCameraPose;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -33,26 +33,25 @@ import java.util.Optional;
 public class Swerve {
 
     private static final PhotonCameraPose photonCameraPose = new PhotonCameraPose();
-    private final Translation2d frontLeftLocation = new Translation2d(0.381, 0.381);
-    private final Translation2d frontRightLocation = new Translation2d(0.381, -0.381);
-    private final Translation2d backLeftLocation = new Translation2d(-0.381, 0.381);
-    private final Translation2d backRightLocation = new Translation2d(-0.381, -0.381);
+    SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(3);
+    SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(3);
+    SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
     private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
-            Constants.DriveConstants.FRONT_LEFT_DRIVING_CAN_ID,
-            Constants.DriveConstants.FRONT_LEFT_TURNING_CAN_ID,
-            Constants.DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET);
+            DriveConstants.FRONT_LEFT_DRIVING_CAN_ID,
+            DriveConstants.FRONT_LEFT_TURNING_CAN_ID,
+            DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET);
     private final MAXSwerveModule m_frontRight = new MAXSwerveModule(
-            Constants.DriveConstants.FRONT_RIGHT_DRIVING_CAN_ID,
-            Constants.DriveConstants.FRONT_RIGHT_TURNING_CAN_ID,
-            Constants.DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET);
+            DriveConstants.FRONT_RIGHT_DRIVING_CAN_ID,
+            DriveConstants.FRONT_RIGHT_TURNING_CAN_ID,
+            DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET);
     private final MAXSwerveModule m_backLeft = new MAXSwerveModule(
-            Constants.DriveConstants.BACK_LEFT_DRIVING_CAN_ID,
-            Constants.DriveConstants.BACK_LEFT_TURNING_CAN_ID,
-            Constants.DriveConstants.BACK_LEFT_CHASSIS_ANGULAR_OFFSET);
+            DriveConstants.BACK_LEFT_DRIVING_CAN_ID,
+            DriveConstants.BACK_LEFT_TURNING_CAN_ID,
+            DriveConstants.BACK_LEFT_CHASSIS_ANGULAR_OFFSET);
     private final MAXSwerveModule m_backRight = new MAXSwerveModule(
-            Constants.DriveConstants.BACK_RIGHT_DRIVING_CAN_ID,
-            Constants.DriveConstants.BACK_RIGHT_TURNING_CAN_ID,
-            Constants.DriveConstants.BACK_RIGHT_CHASSIS_ANGULAR_OFFSET);
+            DriveConstants.BACK_RIGHT_DRIVING_CAN_ID,
+            DriveConstants.BACK_RIGHT_TURNING_CAN_ID,
+            DriveConstants.BACK_RIGHT_CHASSIS_ANGULAR_OFFSET);
     private final ADIS16470_IMU gyro = new ADIS16470_IMU();
     private final MAXSwerveModule[] MAXSwerveModules = new MAXSwerveModule[]{
             m_frontLeft,
@@ -65,7 +64,7 @@ public class Swerve {
     below are robot specific, and should be tuned. */
     private final SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(
-                    Constants.DriveConstants.DRIVE_KINEMATICS,
+                    DriveConstants.DRIVE_KINEMATICS,
                     getGyroAngle(),
                     getModulePositions(),
                     new Pose2d(),
@@ -98,10 +97,10 @@ public class Swerve {
             else { swerveModule.setCoastMode(); }
         }
     }
+
     public void periodic() {
         updateOdometry();
     }
-
 
     /**
      * Method to drive the robot using joystick info.
@@ -110,15 +109,13 @@ public class Swerve {
      * @param ySpeed        Speed of the robot in the y direction (sideways).
      * @param rotation      Angular rate of the robot.
      * @param fieldRelative Whether the provided x and y speeds are relative to the field.
+     * @param rateLimited   Whether the robot should be rate limited.
      */
     public void drive(double xSpeed, double ySpeed, double rotation, boolean fieldRelative, boolean rateLimited) {
         SwerveModuleState[] swerveModuleStates;
         if (rateLimited) {
-            SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(3);
-            SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(3);
-            SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
 
-            swerveModuleStates = Constants.DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
+            swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
                     fieldRelative
                             ? ChassisSpeeds.fromFieldRelativeSpeeds(
                             xSpeedLimiter.calculate(xSpeed),
@@ -126,18 +123,18 @@ public class Swerve {
                             rotationLimiter.calculate(rotation),
                             getPose().getRotation())
                             : new ChassisSpeeds(
-                            xSpeedLimiter.calculate(xSpeed),
-                            ySpeedLimiter.calculate(ySpeed),
-                            rotationLimiter.calculate(rotation)));
+                            xSpeedLimiter.calculate(xSpeed) * DriveConstants.MAX_SPEED_METERS_PER_SECOND,
+                            ySpeedLimiter.calculate(ySpeed) * DriveConstants.MAX_SPEED_METERS_PER_SECOND,
+                            rotationLimiter.calculate(rotation) * DriveConstants.MAX_ANGULAR_SPEED));
 
         } else {
-            swerveModuleStates = Constants.DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
+            swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
                     fieldRelative
                             ? ChassisSpeeds.fromFieldRelativeSpeeds(
                             xSpeed,
                             ySpeed,
                             rotation,
-                            poseEstimator.getEstimatedPosition().getRotation())
+                            getPose().getRotation())
                             : new ChassisSpeeds(
                             xSpeed,
                             ySpeed,
@@ -147,23 +144,27 @@ public class Swerve {
     }
 
     public void updateOdometry() {
-        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyro.getRotation2d(), getModulePositions());
-        this.field.setRobotPose(poseEstimator.getEstimatedPosition());
+        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getGyroAngle(), getModulePositions());
+        this.field.setRobotPose(getPose());
     }
 
     public void setWheelsX() {
-        m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-        m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-        m_backLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-        m_backRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+        setModuleStates(new SwerveModuleState[]{
+                new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(-45))
+        });
     }
 
     public void setWheelsUp() {
         // TODO: get Yaw from gyro method and move to new class
-        m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())));
-        m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())));
-        m_backLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())));
-        m_backRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())));
+        setModuleStates(new SwerveModuleState[]{
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw())),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(90).minus(getYaw()))
+        });
     }
 
     public void resetEncoders() {
@@ -184,35 +185,12 @@ public class Swerve {
         return poseEstimator;
     }
 
-    public void calibrateOdometry() {
-
-        Optional<EstimatedRobotPose> result = photonCameraPose.getEstimatedRobotPose(getPose());
-
-        if (result.isPresent()) {
-
-            EstimatedRobotPose camEstimator = result.get();
-
-            poseEstimator.addVisionMeasurement(
-                    camEstimator.estimatedPose.toPose2d(),
-                    Timer.getFPGATimestamp());
-        }
-
-        // TODO: Add Tag ID
-        // TODO: Modify Target Pose and get Norm
-        // TODO: Implement the norm into the odometry and vision
-        if (photonCameraPose.getTagLayout().getTagPose(tagID).isPresent()) {
-            Pose2d targetPose = photonCameraPose.getTagLayout().getTagPose(tagID).get().toPose2d();
-            targetPose = getModifiedTargetPose(targetPose);
-            currentNorm = swerve.getPose().minus(targetPose).getTranslation().getNorm();
-        }
-    }
-
     private Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
     private void setModuleStates(SwerveModuleState[] desiredStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.DriveConstants.MAX_SPEED);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
         m_frontLeft.setDesiredState(desiredStates[0]);
         m_frontRight.setDesiredState(desiredStates[1]);
         m_backLeft.setDesiredState(desiredStates[2]);
@@ -228,4 +206,6 @@ public class Swerve {
         return positions;
     }
 
+    public void getYaw() {
+    }
 }
