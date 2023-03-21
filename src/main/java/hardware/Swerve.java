@@ -26,38 +26,36 @@ import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
 
 
-/** Represents a swerve drive style drivetrain. */
-public class Swerve
-{
+/**
+ * Represents a swerve drive style drivetrain.
+ */
+public class Swerve {
 
+    private static final PhotonCameraPose photonCameraPose = new PhotonCameraPose();
     private final Translation2d frontLeftLocation = new Translation2d(0.381, 0.381);
     private final Translation2d frontRightLocation = new Translation2d(0.381, -0.381);
     private final Translation2d backLeftLocation = new Translation2d(-0.381, 0.381);
     private final Translation2d backRightLocation = new Translation2d(-0.381, -0.381);
-
     // TODO: Fix the MAXSwerveModule class instantiation.
     private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(1, 2, 0, 1, 2, 3);
     private final MAXSwerveModule m_frontRight = new MAXSwerveModule(3, 4, 4, 5, 6, 7);
     private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, 8, 9, 10, 11);
     private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, 12, 13, 14, 15);
-
     // TODO: edit what gyro we use
     private final AnalogGyro gyro = new AnalogGyro(0);
-
     private final MAXSwerveModule[] MAXSwerveModules = new MAXSwerveModule[]{
             m_frontLeft,
             m_frontRight,
             m_backLeft,
             m_backRight
     };
-
     /* Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings. The numbers used
     below are robot specific, and should be tuned. */
     private final SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(
                     Constants.DriveConstants.DRIVE_KINEMATICS,
                     gyro.getRotation2d(),
-                    new SwerveModulePosition[] {
+                    new SwerveModulePosition[]{
                             m_frontLeft.getPosition(),
                             m_frontRight.getPosition(),
                             m_backLeft.getPosition(),
@@ -76,11 +74,9 @@ public class Swerve
             m_backLeft,
             m_backRight
     };
-    private static final PhotonCameraPose photonCameraPose = new PhotonCameraPose();
 
 
-    public Swerve()
-    {
+    public Swerve() {
         resetEncoders();
         // TODO: add methods for gyro and make a new class for them
         zeroHeading();
@@ -89,12 +85,11 @@ public class Swerve
         SmartDashboard.putData("Field", field);
     }
 
-    public void periodic()
-    {
+    public void periodic() {
         updateOdometry();
     }
-    
-    
+
+
     /**
      * Method to drive the robot using joystick info.
      *
@@ -103,8 +98,7 @@ public class Swerve
      * @param rotation      Angular rate of the robot.
      * @param fieldRelative Whether the provided x and y speeds are relative to the field.
      */
-    public void drive(double xSpeed, double ySpeed, double rotation, boolean fieldRelative, boolean rateLimited)
-    {
+    public void drive(double xSpeed, double ySpeed, double rotation, boolean fieldRelative, boolean rateLimited) {
         SwerveModuleState[] swerveModuleStates;
         if (rateLimited) {
             SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(3);
@@ -114,34 +108,33 @@ public class Swerve
             swerveModuleStates = Constants.DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
                     fieldRelative
                             ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    xSpeedLimiter.calculate(xSpeed),
-                                    ySpeedLimiter.calculate(ySpeed),
-                                    rotationLimiter.calculate(rotation),
-                                    getPose().getRotation())
+                            xSpeedLimiter.calculate(xSpeed),
+                            ySpeedLimiter.calculate(ySpeed),
+                            rotationLimiter.calculate(rotation),
+                            getPose().getRotation())
                             : new ChassisSpeeds(
-                                    xSpeedLimiter.calculate(xSpeed),
-                                    ySpeedLimiter.calculate(ySpeed),
-                                    rotationLimiter.calculate(rotation)));
+                            xSpeedLimiter.calculate(xSpeed),
+                            ySpeedLimiter.calculate(ySpeed),
+                            rotationLimiter.calculate(rotation)));
 
-        }
-        else {
+        } else {
             swerveModuleStates = Constants.DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
                     fieldRelative
                             ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    xSpeed,
-                                    ySpeed,
-                                    rotation,
-                                    poseEstimator.getEstimatedPosition().getRotation())
+                            xSpeed,
+                            ySpeed,
+                            rotation,
+                            poseEstimator.getEstimatedPosition().getRotation())
                             : new ChassisSpeeds(
-                                    xSpeed,
-                                    ySpeed,
-                                    rotation));
+                            xSpeed,
+                            ySpeed,
+                            rotation));
         }
         setModuleStates(swerveModuleStates);
     }
 
     public void updateOdometry() {
-        poseEstimator.updateWithTime( Timer.getFPGATimestamp(), gyro.getRotation2d(), getModulePositions());
+        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyro.getRotation2d(), getModulePositions());
         this.field.setRobotPose(poseEstimator.getEstimatedPosition());
     }
 
@@ -178,12 +171,11 @@ public class Swerve
         return poseEstimator;
     }
 
-    public void calibrateOdometry()
-    {
+    public void calibrateOdometry() {
 
         Optional<EstimatedRobotPose> result = photonCameraPose.getEstimatedRobotPose(getPose());
 
-        if (result.isPresent()){
+        if (result.isPresent()) {
 
             EstimatedRobotPose camEstimator = result.get();
 
