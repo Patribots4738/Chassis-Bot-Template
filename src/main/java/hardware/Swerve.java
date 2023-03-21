@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -52,26 +53,21 @@ public class Swerve {
             Constants.DriveConstants.BACK_RIGHT_DRIVING_CAN_ID,
             Constants.DriveConstants.BACK_RIGHT_TURNING_CAN_ID,
             Constants.DriveConstants.BACK_RIGHT_CHASSIS_ANGULAR_OFFSET);
-    // TODO: edit what gyro we use
-    private final AnalogGyro gyro = new AnalogGyro(0);
+    private final ADIS16470_IMU gyro = new ADIS16470_IMU();
     private final MAXSwerveModule[] MAXSwerveModules = new MAXSwerveModule[]{
             m_frontLeft,
             m_frontRight,
             m_backLeft,
             m_backRight
     };
+
     /* Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings. The numbers used
     below are robot specific, and should be tuned. */
     private final SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(
                     Constants.DriveConstants.DRIVE_KINEMATICS,
-                    gyro.getRotation2d(),
-                    new SwerveModulePosition[]{
-                            m_frontLeft.getPosition(),
-                            m_frontRight.getPosition(),
-                            m_backLeft.getPosition(),
-                            m_backRight.getPosition()
-                    },
+                    getGyroAngle(),
+                    getModulePositions(),
                     new Pose2d(),
                     // These standard deviations are the default values, (the higher these values are, the less you trust the measurements)
                     // even if these params removed,
@@ -91,11 +87,17 @@ public class Swerve {
         resetEncoders();
         // TODO: add methods for gyro and make a new class for them
         zeroHeading();
-        // TODO: make more methods for the drive system
         setBreakMode(true);
         SmartDashboard.putData("Field", field);
     }
 
+    public void setBreakMode(boolean brakeMode) {
+        for (MAXSwerveModule swerveModule : swerveModules) {
+            // if brakeMode is true, setBrakeMode will be called, otherwise setCoastMode will be called with a one line if statement
+            if (brakeMode) { swerveModule.setBrakeMode(); }
+            else { swerveModule.setCoastMode(); }
+        }
+    }
     public void periodic() {
         updateOdometry();
     }
