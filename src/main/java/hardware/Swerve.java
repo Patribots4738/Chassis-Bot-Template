@@ -12,20 +12,14 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.photonvision.EstimatedRobotPose;
-
-import java.util.Optional;
-
 
 /**
  * Represents a swerve drive style drivetrain.
@@ -33,6 +27,7 @@ import java.util.Optional;
 public class Swerve {
 
     private static final PhotonCameraPose photonCameraPose = new PhotonCameraPose();
+
     SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(3);
     SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(3);
     SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
