@@ -1,3 +1,10 @@
-#   Example Robot: SwerveDrivePoseEstimator
+#   Example Robot: Simple Chassy Bot
 
-Demonstrates the use of the SwerveDrivePoseEstimator as a replacement for swerve drive odometry.
+### This Template is a simple robot swerve base with drive pose estimation.
+
+Some of the features of this template include:
+- Drive Pose Estimation / Odometry
+- MAXSwerveModule with Swerve Drive
+- Gyro
+- April tag processing
+- Autonomous driving

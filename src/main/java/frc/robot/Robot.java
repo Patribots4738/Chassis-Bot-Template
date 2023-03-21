@@ -31,6 +31,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         // swap the left Y and left X values because the field is rotated 90 degrees to the driver station (this may change depending on where the drive is.)
+        swerve.periodic();
         swerve.drive(driver.getLeftY(), driver.getLeftX(), driver.getRightX(), true, driver.getAButton());
     }
 

@@ -80,29 +80,37 @@ public class Swerve {
             m_backLeft,
             m_backRight
     };
-    private double pitch = getPitch().getDegrees();
-    private double roll = getRoll().getDegrees();
-    private double yaw = getYaw().getDegrees();
+
+    public double pitch = getPitch().getDegrees();
+    public double roll = getRoll().getDegrees();
+    public double yaw = getYaw().getDegrees();
 
 
     public Swerve() {
         resetEncoders();
-        // TODO: add methods for gyro and make a new class for them
         zeroHeading();
         setBreakMode(true);
         SmartDashboard.putData("Field", field);
     }
 
+    /**
+     * Periodic method for the swerve drive.
+     */
+    public void periodic() {
+        updateOdometry();
+    }
+
+    /**
+     * Set all swerve modules to brake mode or coast mode.
+     *
+     * @param brakeMode Whether the robot should be in brake mode or coast mode.
+     */
     public void setBreakMode(boolean brakeMode) {
         for (MAXSwerveModule swerveModule : swerveModules) {
             // if brakeMode is true, setBrakeMode will be called, otherwise setCoastMode will be called with a one line if statement
             if (brakeMode) { swerveModule.setBrakeMode(); }
             else { swerveModule.setCoastMode(); }
         }
-    }
-
-    public void periodic() {
-        updateOdometry();
     }
 
     /**
@@ -146,11 +154,18 @@ public class Swerve {
         setModuleStates(swerveModuleStates);
     }
 
+    /**
+     * Updates the field relative position of the robot.
+     * This should be called periodically.
+     */
     public void updateOdometry() {
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         this.field.setRobotPose(getPose());
     }
 
+    /**
+     * Sets the desired state of each module to rotate the wheels in an X pattern.
+     */
     public void setWheelsX() {
         setModuleStates(new SwerveModuleState[]{
                 new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
@@ -160,6 +175,9 @@ public class Swerve {
         });
     }
 
+    /**
+     * Sets the desired state of each module to rotate the wheels in the up position.
+     */
     public void setWheelsUp() {
         // TODO: get Yaw from gyro method and move to new class
         setModuleStates(new SwerveModuleState[]{
@@ -170,28 +188,50 @@ public class Swerve {
         });
     }
 
+    /**
+     * resets the encoders on all the modules
+     */
     public void resetEncoders() {
         for (MAXSwerveModule mSwerveMod : swerveModules) {
             mSwerveMod.resetEncoders();
         }
     }
 
+    /**
+     * resets the PoseEstimator to the given pose
+     *
+     * @param pose the pose to reset the odometry to
+     */
     public void resetOdometry(Pose2d pose) {
-        // TODO: get Yaw from gyro method and move to new class
         poseEstimator.resetPosition(
                 getPoseRotation(),
                 getModulePositions(),
                 pose);
     }
 
+    /**
+     * returns the PoseEstimator to be used in other classes
+     *
+     * @return poseEstimator is the PoseEstimator object
+     */
     public SwerveDrivePoseEstimator getPoseEstimator() {
         return poseEstimator;
     }
 
+    /**
+     * returns the current estimated pose of the robot from the PoseEstimator
+     *
+     * @return poseEstimator.getEstimatedPosition() is the current estimated pose of the robot
+     */
     private Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
+    /**
+     * sets the desired state of each module to the given states array
+     *
+     * @param desiredStates the array of desired states for each module
+     */
     private void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
         m_frontLeft.setDesiredState(desiredStates[0]);
@@ -200,6 +240,11 @@ public class Swerve {
         m_backRight.setDesiredState(desiredStates[3]);
     }
 
+    /**
+     * returns the current position of each module
+     *
+     * @return positions is the array of current positions of each module
+     */
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
 
@@ -209,12 +254,27 @@ public class Swerve {
         return positions;
     }
 
+    /**
+     * resets the gyro to 0 degrees
+     */
     public void zeroHeading() {
         gyro.reset();
     }
+
+    /**
+     * returns the current estimated heading of the robot in Rotation2d object
+     *
+     * @return getPose().getRotation() is the current estimated heading of the robot
+     */
     public Rotation2d getPoseRotation() {
         return getPose().getRotation();
     }
+
+    /**
+     * returns the current heading of the gyro in Rotation object
+     *
+     * @return yawRotation2d is the current heading of the gyro
+     */
     public Rotation2d getYaw() {
         Rotation2d yawRotation2d = Rotation2d.fromDegrees(gyro.getAngle());
 
@@ -226,6 +286,12 @@ public class Swerve {
 
         return yawRotation2d;
     }
+
+    /**
+     * returns the current pitch of the gyro in Rotation2d object
+     *
+     * @return pitchRotation2d is the current pitch of the gyro
+     */
     public Rotation2d getPitch() {
 
         Rotation2d pitchRotation2d = Rotation2d.fromDegrees(gyro.getXComplementaryAngle() - ((gyro.getXComplementaryAngle() > 0) ? 180 : -180));
@@ -235,6 +301,12 @@ public class Swerve {
         return pitchRotation2d;
 
     }
+
+    /**
+     * returns the current roll of the gyro in Rotation2d object
+     *
+     * @return rollRotation2d is the current roll of the gyro
+     */
     public Rotation2d getRoll() {
 
         Rotation2d rollRotation2d = Rotation2d.fromDegrees(gyro.getYComplementaryAngle() - ((gyro.getYComplementaryAngle() > 0) ? 180 : -180));
