@@ -25,9 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Represents a swerve drive style drivetrain.
  */
 public class Swerve {
-
-    private static final PhotonCameraPose photonCameraPose = new PhotonCameraPose();
-
     SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(3);
     SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(3);
     SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
@@ -124,9 +121,9 @@ public class Swerve {
             swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
                     fieldRelative
                             ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                            xSpeedLimiter.calculate(xSpeed),
-                            ySpeedLimiter.calculate(ySpeed),
-                            rotationLimiter.calculate(rotation),
+                            xSpeedLimiter.calculate(xSpeed) * DriveConstants.MAX_SPEED_METERS_PER_SECOND,
+                            ySpeedLimiter.calculate(ySpeed) * DriveConstants.MAX_SPEED_METERS_PER_SECOND,
+                            rotationLimiter.calculate(rotation) * DriveConstants.MAX_ANGULAR_SPEED,
                             getPoseRotation())
                             : new ChassisSpeeds(
                             xSpeedLimiter.calculate(xSpeed) * DriveConstants.MAX_SPEED_METERS_PER_SECOND,
