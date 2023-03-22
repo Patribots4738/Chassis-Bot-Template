@@ -1,4 +1,4 @@
-#   Example Robot: Simple Chassy Bot
+#   Example Robot: Simple Chassis Bot
 
 ### This Template is a simple robot swerve base with drive pose estimation.
 

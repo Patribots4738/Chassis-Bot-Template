@@ -12,7 +12,9 @@ import hardware.Swerve;
 
 public class Robot extends TimedRobot {
     private final XboxController driver = new XboxController(0);
-    private final Swerve swerve = new Swerve();
+    private final XboxController operator = new XboxController(1);
+
+    private final Swerve swerve = new Swerve(driver, operator);
 
     @Override
     public void robotInit() {}

@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -77,8 +78,13 @@ public class Swerve {
     public double roll = getRoll().getDegrees();
     public double yaw = getYaw().getDegrees();
 
+    XboxController driver;
+    XboxController operator;
 
-    public Swerve() {
+
+    public Swerve(XboxController driver, XboxController operator) {
+        this.driver = driver;
+        this.operator = operator;
         resetEncoders();
         zeroHeading();
         setBreakMode(true);
@@ -215,7 +221,7 @@ public class Swerve {
      *
      * @return poseEstimator.getEstimatedPosition() is the current estimated pose of the robot
      */
-    private Pose2d getPose() {
+    public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
@@ -307,5 +313,23 @@ public class Swerve {
 
         return rollRotation2d;
 
+    }
+
+    public XboxController getDriver(){
+        return this.driver;
+    }
+
+    public XboxController getOperator(){
+        return this.operator;
+    }
+
+    public void driveToPose(ChassisSpeeds translationSpeeds) {
+        drive(
+                translationSpeeds.vyMetersPerSecond,
+                translationSpeeds.vxMetersPerSecond,
+                translationSpeeds.omegaRadiansPerSecond,
+                false,
+                false
+        );
     }
 }
