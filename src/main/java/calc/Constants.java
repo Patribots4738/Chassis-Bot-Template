@@ -95,6 +95,19 @@ public class Constants {
         public static final boolean GYRO_REVERSED = true;
     }
 
+    public static final class OIConstants {
+
+        public static final int DRIVER_CONTROLLER_PORT = 0;
+        public static final int OPERATOR_CONTROLLER_PORT = 1;
+
+        public static final double CONTROLLER_DEADBAND = 0.15;
+
+        // See https://www.desmos.com/calculator/e07raajzh5
+        // And https://docs.google.com/spreadsheets/d/1Lytrh6q9jkz4u1gmF1Sk8kTpj8DxW-uwRE_QMnTt8Lk
+        public static final double CONTROLLER_CORNER_SLOPE_1 = 1 / 0.7;
+        public static final double CONTROLLER_CORNER_SLOPE_2 = 0.7;
+    }
+
     public static final class NeoMotorConstants {
         public static final double FREE_SPEED_RPM = 5676;
     }

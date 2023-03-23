@@ -8,13 +8,14 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import hardware.Swerve;
+import calc.PatriBoxController;
 
 
 public class Robot extends TimedRobot {
-    private final XboxController driver = new XboxController(0);
-    private final XboxController operator = new XboxController(1);
 
-    private final Swerve swerve = new Swerve(driver, operator);
+    private final Swerve swerve = new Swerve();
+    public static XboxController driver = new PatriBoxController(0);
+    public static XboxController operator = new PatriBoxController(1);
 
     @Override
     public void robotInit() {}

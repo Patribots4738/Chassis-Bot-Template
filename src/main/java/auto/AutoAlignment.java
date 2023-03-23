@@ -1,7 +1,6 @@
 package auto;
 
 import calc.PhotonCameraPose;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
@@ -9,6 +8,8 @@ import hardware.Swerve;
 import org.photonvision.EstimatedRobotPose;
 
 import java.util.Optional;
+
+import static frc.robot.Robot.driver;
 
 public class AutoAlignment {
 
@@ -61,7 +62,7 @@ public class AutoAlignment {
                 );
 
         ChassisSpeeds controllerSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                swerve.getDriver().getLeftX(),
+                driver.getLeftX(),
                 0,
                 0,
                 swerve.getPose().getRotation()

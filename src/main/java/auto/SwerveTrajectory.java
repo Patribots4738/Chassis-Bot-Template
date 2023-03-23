@@ -188,6 +188,7 @@ public class SwerveTrajectory implements Loggable {
     public static void resetTrajectoryStatus() {
 
         trajectoryStatus = "setup";
+        HDC.getThetaController().reset();
 
     }
 

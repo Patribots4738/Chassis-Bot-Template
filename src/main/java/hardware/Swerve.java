@@ -5,8 +5,7 @@
 
 package hardware;
 
-import calc.Constants.*;
-import calc.PhotonCameraPose;
+import calc.Constants.DriveConstants;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -18,7 +17,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -29,32 +27,35 @@ public class Swerve {
     SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(3);
     SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(3);
     SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
-    private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
+    private final MAXSwerveModule frontLeft = new MAXSwerveModule(
             DriveConstants.FRONT_LEFT_DRIVING_CAN_ID,
             DriveConstants.FRONT_LEFT_TURNING_CAN_ID,
             DriveConstants.FRONT_LEFT_CHASSIS_ANGULAR_OFFSET);
-    private final MAXSwerveModule m_frontRight = new MAXSwerveModule(
+    private final MAXSwerveModule frontRight = new MAXSwerveModule(
             DriveConstants.FRONT_RIGHT_DRIVING_CAN_ID,
             DriveConstants.FRONT_RIGHT_TURNING_CAN_ID,
             DriveConstants.FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET);
-    private final MAXSwerveModule m_backLeft = new MAXSwerveModule(
+    private final MAXSwerveModule backLeft = new MAXSwerveModule(
             DriveConstants.BACK_LEFT_DRIVING_CAN_ID,
             DriveConstants.BACK_LEFT_TURNING_CAN_ID,
             DriveConstants.BACK_LEFT_CHASSIS_ANGULAR_OFFSET);
-    private final MAXSwerveModule m_backRight = new MAXSwerveModule(
+    private final MAXSwerveModule backRight = new MAXSwerveModule(
             DriveConstants.BACK_RIGHT_DRIVING_CAN_ID,
             DriveConstants.BACK_RIGHT_TURNING_CAN_ID,
             DriveConstants.BACK_RIGHT_CHASSIS_ANGULAR_OFFSET);
     private final ADIS16470_IMU gyro = new ADIS16470_IMU();
     private final MAXSwerveModule[] MAXSwerveModules = new MAXSwerveModule[]{
-            m_frontLeft,
-            m_frontRight,
-            m_backLeft,
-            m_backRight
+            frontLeft,
+            frontRight,
+            backLeft,
+            backRight
     };
 
-    /* Here we use SwerveDrivePoseEstimator so that we can fuse odometry readings. The numbers used
-    below are robot specific, and should be tuned. */
+    /**
+     * The field-relative position of the robot.
+     *
+     * @return The field-relative position of the robot.
+     */
     private final SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(
                     DriveConstants.DRIVE_KINEMATICS,
@@ -64,27 +65,24 @@ public class Swerve {
                     // These standard deviations are the default values, (the higher these values are, the less you trust the measurements)
                     // even if these params removed,
                     // the standard deviations will be set to these values
-                    VecBuilder.fill(0.1, 0.1, 0.1), // State measurement standard deviations
-                    VecBuilder.fill(0.9, 0.9, 0.9)); // Vision measurement standard deviations
+                    VecBuilder.fill(0.1, 0.1, 0.05), // State measurement standard deviations
+                    VecBuilder.fill(0.9, 0.9, 3)); // Vision measurement standard deviations
+    // Notice the high number on the theta
+    // This is in place because our IMU is more accurate than our odometry
     private final Field2d field = new Field2d();
     private final MAXSwerveModule[] swerveModules = new MAXSwerveModule[]{
-            m_frontLeft,
-            m_frontRight,
-            m_backLeft,
-            m_backRight
+            frontLeft,
+            frontRight,
+            backLeft,
+            backRight
     };
 
     public double pitch = getPitch().getDegrees();
     public double roll = getRoll().getDegrees();
     public double yaw = getYaw().getDegrees();
 
-    XboxController driver;
-    XboxController operator;
 
-
-    public Swerve(XboxController driver, XboxController operator) {
-        this.driver = driver;
-        this.operator = operator;
+    public Swerve() {
         resetEncoders();
         zeroHeading();
         setBreakMode(true);
@@ -106,8 +104,11 @@ public class Swerve {
     public void setBreakMode(boolean brakeMode) {
         for (MAXSwerveModule swerveModule : swerveModules) {
             // if brakeMode is true, setBrakeMode will be called, otherwise setCoastMode will be called with a one line if statement
-            if (brakeMode) { swerveModule.setBrakeMode(); }
-            else { swerveModule.setCoastMode(); }
+            if (brakeMode) {
+                swerveModule.setBrakeMode();
+            } else {
+                swerveModule.setCoastMode();
+            }
         }
     }
 
@@ -232,10 +233,10 @@ public class Swerve {
      */
     private void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
-        m_frontLeft.setDesiredState(desiredStates[0]);
-        m_frontRight.setDesiredState(desiredStates[1]);
-        m_backLeft.setDesiredState(desiredStates[2]);
-        m_backRight.setDesiredState(desiredStates[3]);
+        frontLeft.setDesiredState(desiredStates[0]);
+        frontRight.setDesiredState(desiredStates[1]);
+        backLeft.setDesiredState(desiredStates[2]);
+        backRight.setDesiredState(desiredStates[3]);
     }
 
     /**
@@ -315,21 +316,4 @@ public class Swerve {
 
     }
 
-    public XboxController getDriver(){
-        return this.driver;
-    }
-
-    public XboxController getOperator(){
-        return this.operator;
-    }
-
-    public void driveToPose(ChassisSpeeds translationSpeeds) {
-        drive(
-                translationSpeeds.vyMetersPerSecond,
-                translationSpeeds.vxMetersPerSecond,
-                translationSpeeds.omegaRadiansPerSecond,
-                false,
-                false
-        );
-    }
 }
