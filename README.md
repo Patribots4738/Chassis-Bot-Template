@@ -8,4 +8,4 @@ Some of the features of this template include:
 - Gyro
 - April tag processing
 - Autonomous driving
-- PatriBox Controller math + utilities
+- "PatriBox Controller" math + utilities
